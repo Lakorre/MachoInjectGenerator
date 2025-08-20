@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MachoInject Generator Pro</title>
+<style>
+  body {
+    background: linear-gradient(135deg, #0a0a0f, #151520, #1a1a2e);
+    color: #c8c8c8;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  .container {
+    background: linear-gradient(145deg, #1a1a24, #242436);
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 
+                0 1px 2px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+    padding: 50px 60px 70px 60px;
+    width: 100%;
+    max-width: 550px;
+    text-align: center;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .container::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(45deg, 
+      rgba(120, 119, 198, 0.3), 
+      transparent, 
+      rgba(139, 133, 253, 0.2), 
+      transparent, 
+      rgba(120, 119, 198, 0.3));
+    background-size: 300% 300%;
+    border-radius: 25px;
+    z-index: -1;
+    animation: borderGlow 6s ease-in-out infinite;
+  }
+  
+  @keyframes borderGlow {
+    0%, 100% { background-position: 0% 50%; opacity: 0.5; }
+    50% { background-position: 100% 50%; opacity: 0.8; }
+  }
+  
+  h1 {
+    font-weight: 700;
+    font-size: 36px;
+    margin-bottom: 15px;
+    background: linear-gradient(135deg, #7877c6, #8b85fd, #a5b4fc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: titlePulse 4s ease-in-out infinite;
+    letter-spacing: 1px;
+  }
+  
+  @keyframes titlePulse {
+    0%, 100% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.01); filter: brightness(1.1); }
+  }
+  
+  p.description {
+    font-size: 16px;
+    margin-bottom: 30px;
+    color: #9ca3af;
+    opacity: 0.9;
+  }
+  
+  .input-group {
+    margin-bottom: 25px;
+    text-align: left;
+    position: relative;
+  }
+  
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 15px;
+    color: #d1d5db;
+    transition: color 0.3s ease;
+  }
+  
+  input[type="text"] {
+    width: 100%;
+    padding: 15px 20px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background: linear-gradient(145deg, #2a2a3a, #323244);
+    color: #e5e7eb;
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+  }
+  
+  input[type="text"]:focus {
+    outline: none;
+    border-color: #7877c6;
+    box-shadow: 0 0 15px rgba(120, 119, 198, 0.2), inset 0 2px 4px rgba(0,0,0,0.2);
+    transform: translateY(-1px);
+  }
+  
+  input[type="text"]:focus + .input-indicator {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .input-indicator {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(10px);
+    opacity: 0;
+    font-size: 18px;
+    transition: all 0.3s ease;
+  }
+  
+  input::placeholder {
+    color: #6b7280;
+    opacity: 1;
+  }
+  
+  .btn-wrapper {
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  button#generateBtn {
+    width: 100%;
+    padding: 18px 30px;
+    background: linear-gradient(135deg, #7877c6, #6366f1);
+    background-size: 200% 200%;
+    border: none;
+    border-radius: 35px;
+    color: white;
+    font-weight: 600;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(120, 119, 198, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  button#generateBtn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: left 0.5s;
+  }
+  
+  button#generateBtn:hover {
+    background-position: 100% 0%;
+    box-shadow: 0 8px 20px rgba(120, 119, 198, 0.35);
+    transform: translateY(-2px);
+  }
+  
+  button#generateBtn:hover::before {
+    left: 100%;
+  }
+  
+  button#generateBtn:active {
+    transform: translateY(0px);
+    box-shadow: 0 4px 10px rgba(120, 119, 198, 0.3);
+  }
+  
+  .refresh-wrapper {
+    margin-top: 25px;
+    text-align: center;
+  }
+  
+  #refreshBtn {
+    background: linear-gradient(135deg, rgba(156, 163, 175, 0.2), rgba(107, 114, 128, 0.1));
+    border: 2px solid #6b7280;
+    border-radius: 25px;
+    padding: 12px 25px;
+    color: #9ca3af;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 auto;
+    position: relative;
+  }
+  
+  #refreshBtn:hover {
+    background: linear-gradient(135deg, rgba(156, 163, 175, 0.3), rgba(107, 114, 128, 0.2));
+    border-color: #9ca3af;
+    color: #d1d5db;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px) scale(1.02);
+  }
+  
+  #refreshBtn:active {
+    transform: translateY(0px) scale(0.98);
+  }
+  
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(120, 119, 198, 0.2);
+    border-radius: 2px;
+    margin-top: 15px;
+    overflow: hidden;
+    display: none;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7877c6, #8b85fd);
+    width: 0%;
+    border-radius: 2px;
+    transition: width 0.8s ease;
+  }
+  
+  .output-section {
+    margin-top: 30px;
+    display: none;
+  }
+  
+  .output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .output-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #d1d5db;
+  }
+  
+  #copyBtn {
+    background: linear-gradient(135deg, #059669, #10b981);
+    border: none;
+    border-radius: 20px;
+    color: white;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+  }
+  
+  #copyBtn:hover {
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    transform: translateY(-1px);
+  }
+  
+  #copyBtn.copied {
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    animation: pulse 0.3s ease-in-out;
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  pre#codeOutput {
+    background: linear-gradient(145deg, #1f2937, #111827);
+    border: 2px solid rgba(75, 85, 99, 0.3);
+    border-radius: 18px;
+    padding: 30px;
+    text-align: left;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 17px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    color: #34d399;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), 
+                inset 0 1px 0 rgba(75, 85, 99, 0.1);
+    position: relative;
+    line-height: 1.8;
+    animation: codeGlow 3s ease-in-out infinite alternate;
+  }
+  
+  @keyframes codeGlow {
+    0% { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(75, 85, 99, 0.1); }
+    100% { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(75, 85, 99, 0.1), 0 0 20px rgba(52, 211, 153, 0.1); }
+  }
+  
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    font-weight: 500;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+  }
+  
+  .notification.show {
+    transform: translateX(0);
+  }
+  
+  .notification.error {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+  }
+  
+  footer {
+    margin-top: 40px;
+    font-size: 14px;
+    background: linear-gradient(90deg, #7877c6, #8b85fd);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 500;
+  }
+  
+  .version {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    font-size: 13px;
+    color: #9ca3af;
+    background: linear-gradient(135deg, rgba(75, 85, 99, 0.2), rgba(0, 0, 0, 0.3));
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid rgba(75, 85, 99, 0.3);
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    animation: versionFloat 4s ease-in-out infinite;
+  }
+  
+  @keyframes versionFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
+  }
+  
+
+  
+  /* تحسينات للشاشات الصغيرة */
+  @media (max-width: 600px) {
+    .container {
+      padding: 30px 25px 40px 25px;
+      margin: 10px;
+    }
+    
+    h1 {
+      font-size: 26px;
+    }
+    
+    input[type="text"] {
+      padding: 12px 16px;
+      font-size: 14px;
+    }
+    
+    button#generateBtn {
+      font-size: 15px;
+      padding: 12px 20px;
+    }
+    
+    pre#codeOutput {
+      font-size: 14px;
+      padding: 20px;
+    }
+    
+    .notification {
+      right: 10px;
+      left: 10px;
+      transform: translateY(-100px);
+    }
+    
+    .notification.show {
+      transform: translateY(0);
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="version">v4.0 Enhanced</div>
+  
+  <div class="container">
+    <h1><span>MachoInject</span> Generator Pro</h1>
+    <p class="description">Generate MachoInjectResource code with custom resource and trigger names</p>
+
+    <div class="input-group">
+      <label for="resourceName">🔧 Resource Name</label>
+      <input type="text" id="resourceName" placeholder="Enter your resource name..." />
+      <div class="input-indicator">✓</div>
+    </div>
+
+    <div class="input-group">
+      <label for="triggerName">⚡ Trigger Name</label>
+      <input type="text" id="triggerName" placeholder="Enter your trigger name..." />
+      <div class="input-indicator">✓</div>
+    </div>
+
+    <div class="btn-wrapper">
+      <button id="generateBtn">⚙️ Generate Code</button>
+      <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <div class="refresh-wrapper">
+      <button id="refreshBtn" title="Clear form and start over">↻ Clear Form</button>
+    </div>
+
+    <div class="output-section" id="outputSection">
+      <div class="output-header">
+        <span class="output-title">📋 Generated Code:</span>
+        <button id="copyBtn">📄 Copy Code</button>
+      </div>
+      <pre id="codeOutput"></pre>
+    </div>
+
+    <footer>- Made by Ali - </footer>
+  </div>
+
+  <div class="notification" id="notification">
+    Code copied to clipboard! ✅
+  </div>
+
+  <script>
+    const generateBtn = document.getElementById('generateBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const resourceInput = document.getElementById('resourceName');
+    const triggerInput = document.getElementById('triggerName');
+    const codeOutput = document.getElementById('codeOutput');
+    const outputSection = document.getElementById('outputSection');
+    const progressBar = document.getElementById('progressBar');
+    const progressFill = document.getElementById('progressFill');
+    const notification = document.getElementById('notification');
+
+    // تأثير الكتابة المحسن
+    resourceInput.addEventListener('input', addTypingEffect);
+    triggerInput.addEventListener('input', addTypingEffect);
+
+    function addTypingEffect(e) {
+      e.target.style.transform = 'scale(1.02)';
+      e.target.style.borderColor = '#7877c6';
+      setTimeout(() => {
+        e.target.style.transform = 'scale(1)';
+        e.target.style.borderColor = 'transparent';
+      }, 200);
+    }
+
+    // دالة التحقق من صحة الإدخال
+    function validateInput() {
+      const resource = resourceInput.value.trim();
+      const trigger = triggerInput.value.trim();
+      
+      if (resource && trigger) {
+        generateBtn.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+        return true;
+      } else {
+        generateBtn.style.background = 'linear-gradient(135deg, #7877c6, #6366f1)';
+        return false;
+      }
+    }
+
+    resourceInput.addEventListener('input', validateInput);
+    triggerInput.addEventListener('input', validateInput);
+
+    generateBtn.addEventListener('click', () => {
+      const resource = resourceInput.value.trim();
+      const trigger = triggerInput.value.trim();
+
+      if(!resource || !trigger) {
+        showNotification('Please enter both resource and trigger names! 🚨', 'error');
+        return;
+      }
+
+      // تأثير التحميل المحسن
+      generateBtn.innerHTML = '⏳ Generating...';
+      generateBtn.style.pointerEvents = 'none';
+      progressBar.style.display = 'block';
+      
+      // تحريك شريط التقدم
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 10;
+        progressFill.style.width = progress + '%';
+        if (progress >= 100) {
+          clearInterval(interval);
+        }
+      }, 80);
+
+      setTimeout(() => {
+        const code = `MachoInjectResource("${resource}", [[\n  ${trigger}\n]])`;
+        codeOutput.textContent = code;
+        outputSection.style.display = 'block';
+        
+        // تأثير الظهور المحسن
+        outputSection.style.opacity = '0';
+        outputSection.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+          outputSection.style.transition = 'all 0.5s ease';
+          outputSection.style.opacity = '1';
+          outputSection.style.transform = 'translateY(0)';
+          
+          // إخفاء شريط التقدم
+          setTimeout(() => {
+            progressBar.style.display = 'none';
+            progressFill.style.width = '0%';
+          }, 500);
+        }, 100);
+
+        generateBtn.innerHTML = '⚙️ Generate Code';
+        generateBtn.style.pointerEvents = 'auto';
+        
+        showNotification('Code generated successfully! ✅');
+      }, 800);
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(codeOutput.textContent);
+        
+        // تأثير النسخ المحسن
+        copyBtn.classList.add('copied');
+        copyBtn.innerHTML = '✅ Copied!';
+        
+        showNotification('Code copied to clipboard! 📋');
+        
+        setTimeout(() => {
+          copyBtn.classList.remove('copied');
+          copyBtn.innerHTML = '📄 Copy Code';
+        }, 2000);
+        
+      } catch (err) {
+        // fallback للمتصفحات القديمة
+        const textArea = document.createElement('textarea');
+        textArea.value = codeOutput.textContent;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        showNotification('Code copied to clipboard! 📋');
+      }
+    });
+
+    refreshBtn.addEventListener('click', () => {
+      // تأثير التحديث المحسن
+      refreshBtn.style.transform = 'rotate(360deg) scale(1.1)';
+      
+      setTimeout(() => {
+        // مسح النموذج
+        resourceInput.value = '';
+        triggerInput.value = '';
+        outputSection.style.display = 'none';
+        progressBar.style.display = 'none';
+        progressFill.style.width = '0%';
+        
+        showNotification('Form cleared successfully! ✨');
+        refreshBtn.style.transform = '';
+        resourceInput.focus();
+        validateInput();
+      }, 400);
+    });
+
+    function showNotification(message, type = 'success') {
+      notification.textContent = message;
+      notification.className = 'notification';
+      
+      if (type === 'error') {
+        notification.classList.add('error');
+      }
+      
+      notification.classList.add('show');
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    // تحسين تأثيرات لوحة المفاتيح
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        generateBtn.click();
+      }
+      if (e.ctrlKey && e.key === 'c' && outputSection.style.display === 'block') {
+        e.preventDefault();
+        copyBtn.click();
+      }
+      if (e.key === 'Escape') {
+        if (outputSection.style.display === 'block') {
+          outputSection.style.display = 'none';
+          showNotification('Output hidden 👁️');
+        }
+      }
+      if (e.key === 'F5') {
+        e.preventDefault();
+        refreshBtn.click();
+      }
+    });
+
+    // تحديث محسن عند التحميل
+    window.addEventListener('load', () => {
+      resourceInput.focus();
+      validateInput();
+      
+      // تأثير ترحيب محسن
+      setTimeout(() => {
+        showNotification('Welcome to MachoInject Generator Pro! 🚀');
+      }, 1000);
+    });
+
+    // تأثير hover للحقول
+    [resourceInput, triggerInput].forEach(input => {
+      input.addEventListener('mouseenter', () => {
+        if (!input.matches(':focus')) {
+          input.style.transform = 'translateY(-1px)';
+        }
+      });
+      
+      input.addEventListener('mouseleave', () => {
+        if (!input.matches(':focus')) {
+          input.style.transform = 'translateY(0)';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
