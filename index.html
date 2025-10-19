@@ -85,10 +85,6 @@
             background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
         }
 
-        .menu-item.active:hover {
-            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
-        }
-
         .menu-item a {
             display: flex;
             justify-content: space-between;
@@ -99,18 +95,6 @@
             font-size: 14px;
         }
 
-        .menu-item.search {
-            background: #2a2a2a;
-        }
-
-        .menu-item.search:hover {
-            background: #333333;
-        }
-
-        .menu-item.search a {
-            color: #999999;
-        }
-
         .arrow {
             color: #666666;
             font-size: 20px;
@@ -118,11 +102,6 @@
 
         .menu-item.active .arrow {
             color: #ffffff;
-        }
-
-        .search-icon {
-            color: #666666;
-            font-size: 16px;
         }
 
         .footer {
@@ -166,63 +145,17 @@
             <div class="logo">EGO</div>
         </div>
 
-        <div class="menu-title">Main menu</div>
+        <div class="menu-title">Main Menu</div>
 
-        <ul class="menu-list">
-            <li class="menu-item active">
-                <a href="#player">
-                    <span>Player</span>
-                    <span class="arrow">›</span>
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="#server">
-                    <span>Server</span>
-                    <span class="arrow">›</span>
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="#weapon">
-                    <span>Weapon</span>
-                    <span class="arrow">›</span>
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="#combat">
-                    <span>Combat</span>
-                    <span class="arrow">›</span>
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="#vehicle">
-                    <span>Vehicle</span>
-                    <span class="arrow">›</span>
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="#visual">
-                    <span>Visual</span>
-                    <span class="arrow">›</span>
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="#misc">
-                    <span>Miscellaneous</span>
-                    <span class="arrow">›</span>
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="#settings">
-                    <span>Settings</span>
-                    <span class="arrow">›</span>
-                </a>
-            </li>
-            <li class="menu-item search">
-                <a href="#search">
-                    <span>Search</span>
-                    <span class="search-icon">🔍</span>
-                </a>
-            </li>
+        <ul class="menu-list" id="menuList">
+            <li class="menu-item active"><a href="#"><span>Player</span><span class="arrow">›</span></a></li>
+            <li class="menu-item"><a href="#"><span>Server</span><span class="arrow">›</span></a></li>
+            <li class="menu-item"><a href="#"><span>Weapon</span><span class="arrow">›</span></a></li>
+            <li class="menu-item"><a href="#"><span>Combat</span><span class="arrow">›</span></a></li>
+            <li class="menu-item"><a href="#"><span>Vehicle</span><span class="arrow">›</span></a></li>
+            <li class="menu-item"><a href="#"><span>Visual</span><span class="arrow">›</span></a></li>
+            <li class="menu-item"><a href="#"><span>Miscellaneous</span><span class="arrow">›</span></a></li>
+            <li class="menu-item"><a href="#"><span>Settings</span><span class="arrow">›</span></a></li>
         </ul>
 
         <div class="footer">
@@ -237,15 +170,52 @@
     </div>
 
     <script>
-        const menuItems = document.querySelectorAll('.menu-item:not(.search)');
-        
-        menuItems.forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                menuItems.forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
+        const items = document.querySelectorAll('.menu-item');
+        let currentIndex = 0;
+
+        function updateActive() {
+            items.forEach((item, index) => {
+                item.classList.toggle('active', index === currentIndex);
             });
+        }
+
+        // استقبال الأزرار من سكربت Lua
+        window.addEventListener('message', (event) => {
+            const data = event.data;
+            if (!data || !data.action) return;
+
+            if (data.action === "keyPress") {
+                const key = data.key.toUpperCase();
+
+                switch (key) {
+                    case "ARROWUP":
+                        currentIndex = (currentIndex - 1 + items.length) % items.length;
+                        updateActive();
+                        break;
+                    case "ARROWDOWN":
+                        currentIndex = (currentIndex + 1) % items.length;
+                        updateActive();
+                        break;
+                    case "ENTER":
+                        const selected = items[currentIndex].innerText.trim();
+                        console.log(`✅ Selected: ${selected}`);
+                        break;
+                    case "BACKSPACE":
+                        console.log("⌫ Backspace pressed - delete character");
+                        break;
+                    case "E":
+                        console.log("🔹 Pressed E");
+                        break;
+                    case "Q":
+                        console.log("🔹 Pressed Q");
+                        break;
+                    default:
+                        console.log(`⚙️ Unknown key: ${key}`);
+                }
+            }
         });
+
+        updateActive();
     </script>
 </body>
 </html>
